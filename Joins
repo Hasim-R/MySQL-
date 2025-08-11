@@ -1,0 +1,265 @@
+                                                                                                      INNER JOINS
+
+
+mysql> INSERT INTO Employees3 (emp_id, name, department_id, salary) VALUES
+    -> (1, 'Alice', 101, 60000),
+    -> (2, 'Bob', 102, 55000),
+    -> (3, 'Charlie', 101, 70000),
+    -> (4, 'David', 103, 48000),
+    -> (5, 'Eve', NULL, 75000),
+    -> (6, 'Frank', 104, 52000),
+    -> (7, 'Grace', 102, 58000),
+    -> (8, 'Hannah', NULL, 62000);
+Query OK, 8 rows affected (0.02 sec)
+Records: 8  Duplicates: 0  Warnings: 0
+
+mysql> select * from employees3;
++--------+---------+---------------+--------+
+| emp_id | name    | department_id | salary |
++--------+---------+---------------+--------+
+|      1 | Alice   |           101 |  60000 |
+|      2 | Bob     |           102 |  55000 |
+|      3 | Charlie |           101 |  70000 |
+|      4 | David   |           103 |  48000 |
+|      5 | Eve     |          NULL |  75000 |
+|      6 | Frank   |           104 |  52000 |
+|      7 | Grace   |           102 |  58000 |
+|      8 | Hannah  |          NULL |  62000 |
++--------+---------+---------------+--------+
+8 rows in set (0.00 sec)
+
+mysql> CREATE TABLE Departments (
+    ->     department_id INT PRIMARY KEY,
+    ->     department_name VARCHAR(50),
+    ->     location VARCHAR(50)
+    -> );
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> show tables;
++-------------------+
+| Tables_in_company |
++-------------------+
+| department        |
+| departments       |
+| employee          |
+| employee1         |
+| employees         |
+| employees3        |
+| reaction          |
+| tickets           |
++-------------------+
+8 rows in set (0.00 sec)
+
+mysql> INSERT INTO Departments (department_id, department_name, location) VALUES
+    -> (101, 'HR', 'New York'),
+    -> (102, 'IT', 'San Francisco'),
+    -> (103, 'Finance', 'Chicago'),
+    -> (104, 'Sales', 'Boston'),
+    -> (105, 'Marketing', 'Los Angeles');
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> select * from departments;
++---------------+-----------------+---------------+
+| department_id | department_name | location      |
++---------------+-----------------+---------------+
+|           101 | HR              | New York      |
+|           102 | IT              | San Francisco |
+|           103 | Finance         | Chicago       |
+|           104 | Sales           | Boston        |
+|           105 | Marketing       | Los Angeles   |
++---------------+-----------------+---------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT e.name AS employee_name, d.department_name
+    -> FROM Employees e
+    -> INNER JOIN Departments d
+    ->     ON e.department_id = d.department_id;
++---------------+-----------------+
+| employee_name | department_name |
++---------------+-----------------+
+| Alice         | HR              |
+| Bob           | IT              |
+| Charlie       | HR              |
+| David         | Finance         |
+| Frank         | Sales           |
+| Grace         | IT              |
++---------------+-----------------+
+6 rows in set (0.00 sec)
+
+mysql> SELECT e.name
+    -> FROM Employees e
+    -> INNER JOIN Departments d
+    ->     ON e.department_id = d.department_id
+    -> WHERE d.department_name = 'IT';
++-------+
+| name  |
++-------+
+| Bob   |
+| Grace |
++-------+
+2 rows in set (0.01 sec)
+
+mysql> SELECT DISTINCT d.department_name, d.location
+    -> FROM Employees e
+    -> INNER JOIN Departments d
+    ->     ON e.department_id = d.department_id;
++-----------------+---------------+
+| department_name | location      |
++-----------------+---------------+
+| HR              | New York      |
+| IT              | San Francisco |
+| Finance         | Chicago       |
+| Sales           | Boston        |
++-----------------+---------------+
+4 rows in set (0.00 sec)
+
+mysql> SELECT e.name
+    -> FROM Employees e
+    -> INNER JOIN Departments d
+    ->     ON e.department_id = d.department_id
+    -> WHERE d.location = (
+    ->     SELECT location
+    ->     FROM Departments
+    ->     WHERE department_name = 'HR'
+    -> );
++---------+
+| name    |
++---------+
+| Alice   |
+| Charlie |
++---------+
+2 rows in set (0.01 sec)
+
+mysql> SELECT d.department_name, COUNT(e.emp_id) AS employee_count
+    -> FROM Employees e
+    -> INNER JOIN Departments d
+    ->     ON e.department_id = d.department_id
+    -> GROUP BY d.department_name;
++-----------------+----------------+
+| department_name | employee_count |
++-----------------+----------------+
+| HR              |              2 |
+| IT              |              2 |
+| Finance         |              1 |
+| Sales           |              1 |
++-----------------+----------------+
+4 rows in set (0.00 sec)
+
+                                                                                                     LEFT JOIN
+                  
+mysql> SELECT e.name AS employee_name, d.department_name
+    -> FROM Employees e
+    -> LEFT JOIN Departments d
+    ->     ON e.department_id = d.department_id;
++---------------+-----------------+
+| employee_name | department_name |
++---------------+-----------------+
+| Alice         | NULL            |
+| Bob           | NULL            |
+| Charlie       | NULL            |
+| David         | NULL            |
+| Eve           | NULL            |
+| Frank         | NULL            |
+| Grace         | NULL            |
+| Hannah        | NULL            |
+| Ian           | NULL            |
+| Jack          | NULL            |
+| Alice         | HR              |
+| Bob           | IT              |
+| Charlie       | HR              |
+| David         | Finance         |
+| Eve           | NULL            |
+| Frank         | Sales           |
+| Grace         | IT              |
+| Hannah        | NULL            |
++---------------+-----------------+
+18 rows in set (0.00 sec)
+
+mysql> SELECT e.name
+    -> FROM Employees e
+    -> LEFT JOIN Departments d
+    ->     ON e.department_id = d.department_id
+    -> WHERE d.department_id IS NULL;
++---------+
+| name    |
++---------+
+| Alice   |
+| Bob     |
+| Charlie |
+| David   |
+| Eve     |
+| Frank   |
+| Grace   |
+| Hannah  |
+| Ian     |
+| Jack    |
+| Eve     |
+| Hannah  |
++---------+
+12 rows in set (0.00 sec)
+
+mysql> SELECT d.department_name, e.name AS employee_name
+    -> FROM Departments d
+    -> LEFT JOIN Employees e
+    ->     ON e.department_id = d.department_id;
++-----------------+---------------+
+| department_name | employee_name |
++-----------------+---------------+
+| HR              | Charlie       |
+| HR              | Alice         |
+| IT              | Grace         |
+| IT              | Bob           |
+| Finance         | David         |
+| Sales           | Frank         |
+| Marketing       | NULL          |
++-----------------+---------------+
+7 rows in set (0.00 sec)
+
+mysql> SELECT d.department_name
+    -> FROM Departments d
+    -> LEFT JOIN Employees e
+    ->     ON e.department_id = d.department_id
+    -> WHERE e.emp_id IS NULL;
++-----------------+
+| department_name |
++-----------------+
+| Marketing       |
++-----------------+
+1 row in set (0.00 sec)
+
+                                                                                                     RIGHT JOIN
+
+mysql> SELECT d.department_name, e.name AS employee_name
+    -> FROM Employees e
+    -> RIGHT JOIN Departments d
+    ->     ON e.department_id = d.department_id;
++-----------------+---------------+
+| department_name | employee_name |
++-----------------+---------------+
+| HR              | Charlie       |
+| HR              | Alice         |
+| IT              | Grace         |
+| IT              | Bob           |
+| Finance         | David         |
+| Sales           | Frank         |
+| Marketing       | NULL          |
++-----------------+---------------+
+7 rows in set (0.00 sec)
+
+mysql> SELECT e.name AS employee_name, d.location
+    -> FROM Employees e
+    -> RIGHT JOIN Departments d
+    ->     ON e.department_id = d.department_id;
++---------------+---------------+
+| employee_name | location      |
++---------------+---------------+
+| Charlie       | New York      |
+| Alice         | New York      |
+| Grace         | San Francisco |
+| Bob           | San Francisco |
+| David         | Chicago       |
+| Frank         | Boston        |
+| NULL          | Los Angeles   |
++---------------+---------------+
+7 rows in set (0.00 sec)
